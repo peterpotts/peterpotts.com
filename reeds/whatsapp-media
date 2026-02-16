@@ -1,0 +1,155 @@
+#!/usr/bin/env python3
+import sys
+import html
+import re
+import json  # Import the json module
+
+# Function to extract attached media references (images and videos)
+def extract_attached_media(content):
+    # Use a regular expression to find attached media references
+    pattern = r'<attached:\s+(.*?\.(jpg|mp4|webp))>'
+    
+    media_list = []
+    
+    for match in re.finditer(pattern, content):
+        media_filename = match.group(1)
+        media_extension = match.group(2)
+        
+        # Append media information to the list
+        media_list.append((media_filename, media_extension))
+    
+    return media_list
+
+# Check for the command line argument
+if len(sys.argv) != 2:
+    print("Usage: ./whatsapp_media_gallery.py <input_file>")
+    sys.exit(1)
+
+input_file = sys.argv[1]
+
+# Try to read WhatsApp chat data from the specified file with UTF-8 encoding
+try:
+    with open(input_file, 'r', encoding='utf-8') as chat_file:
+        whatsapp_text = chat_file.read()
+except FileNotFoundError:
+    print(f"Error: File '{input_file}' not found.")
+    sys.exit(1)
+except UnicodeDecodeError:
+    print(f"Error: Unable to decode '{input_file}' as UTF-8.")
+    sys.exit(1)
+
+# Extract attached media (images and videos)
+media_references = extract_attached_media(whatsapp_text)
+
+# Create an HTML media gallery page with swipe and arrow key instructions
+html_output = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Media Gallery</title>
+    <meta charset="UTF-8">
+    <style>
+        .media-container {{
+            max-width: 100%;
+            max-height: 80vh;
+            text-align: center;
+            display: flex;
+            flex-direction: column; /* Display content in a column */
+            align-items: center;
+            justify-content: center; /* Center align content */
+        }}
+        .media {{
+            max-width: 100%;
+            max-height: 80vh; /* Adjust the max height as needed */
+            cursor: pointer;
+            object-fit: contain; /* Ensure images fit both vertically and horizontally */
+        }}
+    </style>
+    <!-- Include Hammer.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script>
+        let currentIndex = 0;
+        let mediaList = {json.dumps(media_references)};
+
+        function showMedia(index) {{
+            if (index < 0) {{
+                index = 0;
+            }}
+            if (index >= mediaList.length) {{
+                index = mediaList.length - 1;
+            }}
+
+            currentIndex = index;
+            let mediaContainer = document.getElementById('media-container');
+            mediaContainer.innerHTML = '';
+
+            if (mediaList[currentIndex][1] === 'jpg' || mediaList[currentIndex][1] === 'webp') {{
+                // Display images
+                let img = document.createElement('img');
+                img.className = 'media';
+                img.src = mediaList[currentIndex][0];
+                img.alt = 'Image ' + (currentIndex + 1);
+                mediaContainer.appendChild(img);
+            }} else if (mediaList[currentIndex][1] === 'mp4') {{
+                // Display videos
+                let video = document.createElement('video');
+                video.className = 'media';
+                video.controls = true;
+                let source = document.createElement('source');
+                source.src = mediaList[currentIndex][0];
+                source.type = 'video/mp4';
+                video.appendChild(source);
+                mediaContainer.appendChild(video);
+            }}
+        }}
+
+        function showNext() {{
+            showMedia(currentIndex + 1);
+        }}
+
+        function showPrevious() {{
+            showMedia(currentIndex - 1);
+        }}
+
+        // Event listener for arrow key navigation
+        document.addEventListener('keydown', function (event) {{
+            if (event.key === 'ArrowRight' || event.key === 'Right') {{
+                showNext();
+            }} else if (event.key === 'ArrowLeft' || event.key === 'Left') {{
+                showPrevious();
+            }}
+        }});
+
+        // Show the first media item when the page loads
+        document.addEventListener('DOMContentLoaded', function() {{
+            showMedia(0);
+
+            // Initialize Hammer.js for swipe gestures
+            let mediaContainer = document.getElementById('media-container');
+            let hammer = new Hammer(mediaContainer);
+
+            hammer.on('swiperight', function() {{
+                showPrevious();
+            }});
+
+            hammer.on('swipeleft', function() {{
+                showNext();
+            }});
+        }});
+    </script>
+</head>
+<body>
+    <h1>Media Gallery</h1>
+    <p>Swipe left or right or use arrow keys for navigation</p>
+    <div id="media-container" class="media-container"></div>
+</body>
+</html>
+"""
+
+# Save the media gallery HTML to a file with the UTF-8 encoding
+output_file = input_file.rsplit('.', 1)[0] + '_media_gallery.html'
+with open(output_file, 'w', encoding='utf-8') as html_file:
+    html_file.write(html_output)
+
+print(f"Media gallery page created from '{input_file}' and saved as '{output_file}'.")
+

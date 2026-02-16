@@ -1,0 +1,102 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Media Gallery</title>
+    <meta charset="UTF-8">
+    <style>
+        .media-container {
+            max-width: 100%;
+            max-height: 80vh;
+            text-align: center;
+            display: flex;
+            flex-direction: column; /* Display content in a column */
+            align-items: center;
+            justify-content: center; /* Center align content */
+        }
+        .media {
+            max-width: 100%;
+            max-height: 80vh; /* Adjust the max height as needed */
+            cursor: pointer;
+            object-fit: contain; /* Ensure images fit both vertically and horizontally */
+        }
+    </style>
+    <!-- Include Hammer.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+    <script>
+        let currentIndex = 0;
+        let mediaList = [["00000058-PHOTO-2023-08-29-03-49-34.jpg", "jpg"], ["00000060-PHOTO-2023-08-29-04-25-31.jpg", "jpg"], ["00000075-PHOTO-2023-08-29-08-42-17.jpg", "jpg"], ["00000079-PHOTO-2023-08-29-08-45-34.jpg", "jpg"], ["00000097-PHOTO-2023-08-29-10-38-29.jpg", "jpg"], ["00000098-PHOTO-2023-08-29-10-38-30.jpg", "jpg"], ["00000099-PHOTO-2023-08-29-10-38-30.jpg", "jpg"], ["00000100-PHOTO-2023-08-29-10-38-31.jpg", "jpg"], ["00000102-PHOTO-2023-08-29-10-40-15.jpg", "jpg"], ["00000103-PHOTO-2023-08-29-10-41-35.jpg", "jpg"], ["00000104-PHOTO-2023-08-29-10-41-36.jpg", "jpg"], ["00000105-PHOTO-2023-08-29-10-41-36.jpg", "jpg"], ["00000106-PHOTO-2023-08-29-10-41-37.jpg", "jpg"], ["00000118-PHOTO-2023-08-29-12-50-25.jpg", "jpg"], ["00000160-PHOTO-2023-08-29-14-27-42.jpg", "jpg"], ["00000193-PHOTO-2023-08-30-00-09-55.jpg", "jpg"], ["00000196-PHOTO-2023-08-30-00-10-30.jpg", "jpg"], ["00000209-PHOTO-2023-08-30-01-11-00.jpg", "jpg"], ["00000234-PHOTO-2023-08-30-10-58-02.jpg", "jpg"], ["00000238-PHOTO-2023-08-30-11-18-43.jpg", "jpg"], ["00000245-PHOTO-2023-08-31-02-41-35.jpg", "jpg"], ["00000284-PHOTO-2023-09-01-01-22-57.jpg", "jpg"], ["00000291-PHOTO-2023-09-01-01-44-28.jpg", "jpg"], ["00000305-PHOTO-2023-09-01-03-48-03.jpg", "jpg"], ["00000308-PHOTO-2023-09-01-07-34-50.jpg", "jpg"], ["00000312-PHOTO-2023-09-01-08-04-50.jpg", "jpg"], ["00000315-PHOTO-2023-09-01-08-23-36.jpg", "jpg"], ["00000331-PHOTO-2023-09-01-09-22-00.jpg", "jpg"], ["00000346-PHOTO-2023-09-01-10-49-23.jpg", "jpg"], ["00000382-PHOTO-2023-09-02-00-19-28.jpg", "jpg"], ["00000384-PHOTO-2023-09-02-00-20-58.jpg", "jpg"], ["00000391-PHOTO-2023-09-02-00-40-42.jpg", "jpg"], ["00000392-PHOTO-2023-09-02-00-40-55.jpg", "jpg"], ["00000429-PHOTO-2023-09-02-04-20-46.jpg", "jpg"], ["00000457-PHOTO-2023-09-02-12-03-04.jpg", "jpg"], ["00000459-PHOTO-2023-09-02-13-40-58.jpg", "jpg"], ["00000523-PHOTO-2023-09-03-07-21-16.jpg", "jpg"], ["00000538-PHOTO-2023-09-03-11-39-20.jpg", "jpg"], ["00000539-PHOTO-2023-09-03-11-40-02.jpg", "jpg"], ["00000542-PHOTO-2023-09-03-11-41-14.jpg", "jpg"], ["00000543-PHOTO-2023-09-03-11-41-19.jpg", "jpg"], ["00000544-PHOTO-2023-09-03-11-41-23.jpg", "jpg"], ["00000545-PHOTO-2023-09-03-11-41-27.jpg", "jpg"], ["00000551-PHOTO-2023-09-03-12-01-24.jpg", "jpg"], ["00000574-PHOTO-2023-09-03-13-13-29.jpg", "jpg"], ["00000636-GIF-2023-09-04-13-02-57.mp4", "mp4"], ["00000722-PHOTO-2023-09-05-12-45-29.jpg", "jpg"], ["00000723-PHOTO-2023-09-05-12-45-29.jpg", "jpg"], ["00000724-PHOTO-2023-09-05-12-45-30.jpg", "jpg"], ["00000725-PHOTO-2023-09-05-12-45-30.jpg", "jpg"], ["00000726-PHOTO-2023-09-05-12-45-31.jpg", "jpg"], ["00000727-PHOTO-2023-09-05-12-45-31.jpg", "jpg"], ["00000728-PHOTO-2023-09-05-12-45-32.jpg", "jpg"], ["00000729-PHOTO-2023-09-05-12-46-59.jpg", "jpg"], ["00000740-PHOTO-2023-09-06-00-42-06.jpg", "jpg"], ["00000742-PHOTO-2023-09-06-00-42-55.jpg", "jpg"], ["00000743-PHOTO-2023-09-06-00-43-02.jpg", "jpg"], ["00000744-PHOTO-2023-09-06-00-43-11.jpg", "jpg"], ["00000794-PHOTO-2023-09-07-13-57-37.jpg", "jpg"], ["00000841-PHOTO-2023-09-09-06-57-37.jpg", "jpg"], ["00000847-VIDEO-2023-09-09-08-34-40.mp4", "mp4"], ["00000848-PHOTO-2023-09-09-08-50-47.jpg", "jpg"], ["00000849-PHOTO-2023-09-09-08-50-47.jpg", "jpg"], ["00000854-PHOTO-2023-09-09-09-35-30.jpg", "jpg"], ["00000867-PHOTO-2023-09-09-10-21-09.jpg", "jpg"], ["00000868-PHOTO-2023-09-09-10-21-09.jpg", "jpg"], ["00000869-PHOTO-2023-09-09-10-21-10.jpg", "jpg"], ["00000870-PHOTO-2023-09-09-10-21-10.jpg", "jpg"], ["00000871-PHOTO-2023-09-09-10-21-11.jpg", "jpg"], ["00000872-PHOTO-2023-09-09-10-21-11.jpg", "jpg"], ["00000873-PHOTO-2023-09-09-10-31-55.jpg", "jpg"], ["00000874-PHOTO-2023-09-09-10-50-26.jpg", "jpg"], ["00000875-PHOTO-2023-09-09-10-50-26.jpg", "jpg"], ["00000876-PHOTO-2023-09-09-10-50-26.jpg", "jpg"], ["00000877-STICKER-2023-09-09-11-00-47.webp", "webp"], ["00000893-PHOTO-2023-09-09-19-33-03.jpg", "jpg"], ["00000894-PHOTO-2023-09-09-19-33-03.jpg", "jpg"], ["00000895-PHOTO-2023-09-09-19-33-03.jpg", "jpg"], ["00000896-PHOTO-2023-09-09-19-33-03.jpg", "jpg"], ["00000897-PHOTO-2023-09-09-19-33-03.jpg", "jpg"], ["00000898-PHOTO-2023-09-09-19-33-04.jpg", "jpg"], ["00000899-PHOTO-2023-09-09-19-33-04.jpg", "jpg"], ["00000900-PHOTO-2023-09-09-19-33-04.jpg", "jpg"], ["00000901-PHOTO-2023-09-09-19-33-04.jpg", "jpg"], ["00000902-PHOTO-2023-09-09-19-33-04.jpg", "jpg"], ["00000903-PHOTO-2023-09-09-19-33-04.jpg", "jpg"], ["00000904-PHOTO-2023-09-09-19-33-04.jpg", "jpg"], ["00000905-PHOTO-2023-09-09-19-33-05.jpg", "jpg"], ["00000906-PHOTO-2023-09-09-19-33-05.jpg", "jpg"], ["00000907-PHOTO-2023-09-09-19-33-05.jpg", "jpg"], ["00000908-PHOTO-2023-09-09-19-33-05.jpg", "jpg"], ["00000909-PHOTO-2023-09-09-19-33-05.jpg", "jpg"], ["00000912-PHOTO-2023-09-09-19-45-13.jpg", "jpg"], ["00000970-PHOTO-2023-09-10-05-34-49.jpg", "jpg"], ["00000971-PHOTO-2023-09-10-05-34-50.jpg", "jpg"], ["00000989-PHOTO-2023-09-10-10-26-44.jpg", "jpg"], ["00000990-PHOTO-2023-09-10-10-38-02.jpg", "jpg"], ["00000997-PHOTO-2023-09-10-12-11-05.jpg", "jpg"], ["00001004-PHOTO-2023-09-10-13-00-59.jpg", "jpg"], ["00001033-PHOTO-2023-09-11-11-50-49.jpg", "jpg"], ["00001040-PHOTO-2023-09-12-05-03-09.jpg", "jpg"], ["00001041-PHOTO-2023-09-12-05-03-09.jpg", "jpg"], ["00001043-PHOTO-2023-09-12-08-12-26.jpg", "jpg"], ["00001044-PHOTO-2023-09-12-08-12-26.jpg", "jpg"], ["00001071-PHOTO-2023-09-12-12-45-13.jpg", "jpg"], ["00001079-PHOTO-2023-09-12-12-52-00.jpg", "jpg"], ["00001151-PHOTO-2023-09-13-08-19-33.jpg", "jpg"], ["00001186-PHOTO-2023-09-14-02-52-49.jpg", "jpg"], ["00001224-PHOTO-2023-09-15-02-40-57.jpg", "jpg"], ["00001243-PHOTO-2023-09-15-03-01-48.jpg", "jpg"], ["00001301-PHOTO-2023-09-15-07-42-30.jpg", "jpg"], ["00001303-PHOTO-2023-09-15-07-43-06.jpg", "jpg"], ["00001307-PHOTO-2023-09-15-07-45-35.jpg", "jpg"], ["00001365-PHOTO-2023-09-17-02-46-20.jpg", "jpg"], ["00001374-PHOTO-2023-09-17-03-43-53.jpg", "jpg"], ["00001403-STICKER-2023-09-17-06-51-47.webp", "webp"], ["00001445-PHOTO-2023-09-17-12-20-41.jpg", "jpg"], ["00001508-PHOTO-2023-09-18-10-51-41.jpg", "jpg"], ["00001541-PHOTO-2023-09-23-10-59-51.jpg", "jpg"], ["00001545-PHOTO-2023-09-23-12-04-31.jpg", "jpg"], ["00001547-PHOTO-2023-09-24-04-24-07.jpg", "jpg"], ["00001549-PHOTO-2023-09-24-04-33-47.jpg", "jpg"], ["00001552-PHOTO-2023-09-29-06-44-36.jpg", "jpg"], ["00001553-PHOTO-2023-09-29-06-47-07.jpg", "jpg"], ["00001554-PHOTO-2023-09-29-06-47-08.jpg", "jpg"], ["00001555-PHOTO-2023-09-29-06-47-08.jpg", "jpg"], ["00001556-PHOTO-2023-09-29-06-47-08.jpg", "jpg"], ["00001557-PHOTO-2023-09-29-06-47-09.jpg", "jpg"], ["00001558-PHOTO-2023-09-29-06-47-09.jpg", "jpg"], ["00001559-PHOTO-2023-09-29-06-47-09.jpg", "jpg"], ["00001596-PHOTO-2023-09-30-09-17-30.jpg", "jpg"], ["00001716-PHOTO-2023-11-01-05-39-15.jpg", "jpg"], ["00001730-PHOTO-2023-11-15-09-08-11.jpg", "jpg"], ["00001736-PHOTO-2023-11-15-10-46-46.jpg", "jpg"], ["00001738-PHOTO-2023-11-15-10-48-08.jpg", "jpg"], ["00001747-PHOTO-2023-11-16-08-01-29.jpg", "jpg"], ["00001748-PHOTO-2023-11-16-08-19-38.jpg", "jpg"], ["00001750-PHOTO-2023-11-16-08-54-43.jpg", "jpg"], ["00001757-PHOTO-2023-11-17-06-05-57.jpg", "jpg"], ["00001766-PHOTO-2023-11-17-12-46-36.jpg", "jpg"], ["00001770-PHOTO-2023-11-17-13-08-34.jpg", "jpg"], ["00001772-PHOTO-2023-11-18-10-18-41.jpg", "jpg"], ["00001774-VIDEO-2023-11-18-10-37-13.mp4", "mp4"], ["00001783-PHOTO-2023-11-19-05-27-32.jpg", "jpg"], ["00001785-PHOTO-2023-11-19-07-53-44.jpg", "jpg"], ["00001805-STICKER-2023-12-25-09-43-07.webp", "webp"], ["00001807-PHOTO-2023-12-25-11-08-44.jpg", "jpg"], ["00001810-VIDEO-2024-01-13-10-33-15.mp4", "mp4"], ["00001811-PHOTO-2024-01-13-10-36-49.jpg", "jpg"], ["00001818-PHOTO-2024-02-06-23-43-07.jpg", "jpg"], ["00001829-PHOTO-2024-02-14-13-37-18.jpg", "jpg"], ["00001868-PHOTO-2024-02-16-12-33-49.jpg", "jpg"], ["00001887-PHOTO-2024-02-26-14-47-15.jpg", "jpg"], ["00001889-PHOTO-2024-02-26-14-48-24.jpg", "jpg"], ["00001890-PHOTO-2024-02-26-14-48-47.jpg", "jpg"], ["00001912-PHOTO-2024-04-05-03-14-48.jpg", "jpg"], ["00001960-PHOTO-2024-04-25-12-51-00.jpg", "jpg"], ["00001968-PHOTO-2024-04-27-00-01-32.jpg", "jpg"], ["00001990-PHOTO-2024-04-28-10-02-52.jpg", "jpg"], ["00001995-VIDEO-2024-05-03-14-46-32.mp4", "mp4"], ["00001997-VIDEO-2024-05-03-14-47-18.mp4", "mp4"], ["00001998-VIDEO-2024-05-03-14-47-57.mp4", "mp4"], ["00001999-VIDEO-2024-05-03-14-50-10.mp4", "mp4"], ["00002000-VIDEO-2024-05-03-14-50-40.mp4", "mp4"], ["00002001-VIDEO-2024-05-03-15-04-01.mp4", "mp4"], ["00002011-GIF-2024-05-14-07-05-03.mp4", "mp4"], ["00002054-PHOTO-2024-06-07-02-25-08.jpg", "jpg"], ["00002055-PHOTO-2024-06-07-02-37-21.jpg", "jpg"], ["00002063-PHOTO-2024-06-07-14-14-12.jpg", "jpg"], ["00002141-PHOTO-2024-06-29-06-29-37.jpg", "jpg"], ["00002147-PHOTO-2024-06-29-09-11-58.jpg", "jpg"], ["00002148-PHOTO-2024-06-29-09-11-58.jpg", "jpg"], ["00002149-PHOTO-2024-06-29-09-11-59.jpg", "jpg"], ["00002150-PHOTO-2024-06-29-09-11-59.jpg", "jpg"], ["00002154-PHOTO-2024-06-29-09-12-02.jpg", "jpg"], ["00002158-PHOTO-2024-06-29-09-12-03.jpg", "jpg"], ["00002159-PHOTO-2024-06-29-09-12-04.jpg", "jpg"], ["00002160-PHOTO-2024-06-29-09-12-04.jpg", "jpg"], ["00002161-PHOTO-2024-06-29-09-12-05.jpg", "jpg"], ["00002162-PHOTO-2024-06-29-09-12-06.jpg", "jpg"], ["00002163-PHOTO-2024-06-29-09-12-06.jpg", "jpg"], ["00002164-PHOTO-2024-06-29-09-12-07.jpg", "jpg"], ["00002165-PHOTO-2024-06-29-09-12-07.jpg", "jpg"], ["00002166-PHOTO-2024-06-29-09-12-08.jpg", "jpg"], ["00002167-PHOTO-2024-06-29-09-18-11.jpg", "jpg"], ["00002173-PHOTO-2024-06-29-13-02-54.jpg", "jpg"], ["00002176-PHOTO-2024-06-29-18-17-28.jpg", "jpg"], ["00002177-PHOTO-2024-06-29-18-17-41.jpg", "jpg"], ["00002178-PHOTO-2024-06-30-01-06-20.jpg", "jpg"], ["00002179-PHOTO-2024-06-30-01-06-49.jpg", "jpg"], ["00002180-PHOTO-2024-06-30-01-07-14.jpg", "jpg"], ["00002181-PHOTO-2024-06-30-01-09-09.jpg", "jpg"], ["00002182-PHOTO-2024-06-30-01-11-07.jpg", "jpg"], ["00002183-PHOTO-2024-06-30-01-11-46.jpg", "jpg"], ["00002184-PHOTO-2024-06-30-01-12-43.jpg", "jpg"], ["00002185-PHOTO-2024-06-30-01-13-17.jpg", "jpg"], ["00002186-PHOTO-2024-06-30-01-16-30.jpg", "jpg"], ["00002199-PHOTO-2024-06-30-08-44-58.jpg", "jpg"], ["00002200-PHOTO-2024-06-30-08-44-58.jpg", "jpg"], ["00002201-PHOTO-2024-06-30-08-44-58.jpg", "jpg"], ["00002202-PHOTO-2024-06-30-08-44-58.jpg", "jpg"], ["00002203-PHOTO-2024-06-30-08-44-58.jpg", "jpg"], ["00002204-PHOTO-2024-06-30-08-44-58.jpg", "jpg"], ["00002205-PHOTO-2024-06-30-08-44-58.jpg", "jpg"], ["00002206-PHOTO-2024-06-30-08-44-58.jpg", "jpg"], ["00002207-PHOTO-2024-06-30-08-44-59.jpg", "jpg"], ["00002208-PHOTO-2024-06-30-08-44-59.jpg", "jpg"], ["00002210-VIDEO-2024-06-30-09-17-40.mp4", "mp4"], ["00002219-PHOTO-2024-06-30-11-59-24.jpg", "jpg"], ["00002221-PHOTO-2024-06-30-12-00-43.jpg", "jpg"], ["00002226-PHOTO-2024-06-30-12-05-37.jpg", "jpg"], ["00002227-PHOTO-2024-06-30-12-05-50.jpg", "jpg"], ["00002228-PHOTO-2024-06-30-12-06-01.jpg", "jpg"], ["00002230-PHOTO-2024-06-30-12-07-25.jpg", "jpg"], ["00002236-PHOTO-2024-06-30-12-16-49.jpg", "jpg"], ["00002237-PHOTO-2024-06-30-12-17-09.jpg", "jpg"], ["00002238-PHOTO-2024-06-30-12-17-17.jpg", "jpg"], ["00002239-PHOTO-2024-06-30-12-17-32.jpg", "jpg"], ["00002240-PHOTO-2024-06-30-12-17-34.jpg", "jpg"], ["00002241-PHOTO-2024-06-30-12-17-34.jpg", "jpg"]];
+
+        function showMedia(index) {
+            if (index < 0) {
+                index = 0;
+            }
+            if (index >= mediaList.length) {
+                index = mediaList.length - 1;
+            }
+
+            currentIndex = index;
+            let mediaContainer = document.getElementById('media-container');
+            mediaContainer.innerHTML = '';
+
+            if (mediaList[currentIndex][1] === 'jpg' || mediaList[currentIndex][1] === 'webp') {
+                // Display images
+                let img = document.createElement('img');
+                img.className = 'media';
+                img.src = mediaList[currentIndex][0];
+                img.alt = 'Image ' + (currentIndex + 1);
+                mediaContainer.appendChild(img);
+            } else if (mediaList[currentIndex][1] === 'mp4') {
+                // Display videos
+                let video = document.createElement('video');
+                video.className = 'media';
+                video.controls = true;
+                let source = document.createElement('source');
+                source.src = mediaList[currentIndex][0];
+                source.type = 'video/mp4';
+                video.appendChild(source);
+                mediaContainer.appendChild(video);
+            }
+        }
+
+        function showNext() {
+            showMedia(currentIndex + 1);
+        }
+
+        function showPrevious() {
+            showMedia(currentIndex - 1);
+        }
+
+        // Event listener for arrow key navigation
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'ArrowRight' || event.key === 'Right') {
+                showNext();
+            } else if (event.key === 'ArrowLeft' || event.key === 'Left') {
+                showPrevious();
+            }
+        });
+
+        // Show the first media item when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            showMedia(0);
+
+            // Initialize Hammer.js for swipe gestures
+            let mediaContainer = document.getElementById('media-container');
+            let hammer = new Hammer(mediaContainer);
+
+            hammer.on('swiperight', function() {
+                showPrevious();
+            });
+
+            hammer.on('swipeleft', function() {
+                showNext();
+            });
+        });
+    </script>
+</head>
+<body>
+    <h1>Media Gallery</h1>
+    <p>Swipe left or right or use arrow keys for navigation</p>
+    <div id="media-container" class="media-container"></div>
+</body>
+</html>

@@ -1,0 +1,123 @@
+#!/usr/bin/env python3
+import sys
+import html
+import re
+
+# Function to split multi-line messages into paragraphs without escaping HTML
+def split_multiline_message(content):
+    paragraphs = content.split('\n\n')
+    return ''.join('<p>{}</p>'.format(p.strip()) for p in paragraphs)
+
+# Function to replace attached media references with HTML elements
+def replace_attached_media(content):
+    # Use a regular expression to find attached media references
+    pattern = r'<attached:\s+(.*?\.(jpg|mp4|webp))>'
+    
+    def replace(match):
+        media_filename = match.group(1)
+        media_extension = match.group(2)
+        
+        if media_extension == 'jpg':
+            # Replace with HTML image tag for JPG
+            return f'<a href="{media_filename}" target="_blank"><img src="{media_filename}" style="max-width: 600px; max-height: 600px;"></a>'
+        elif media_extension == 'mp4':
+            # Replace with HTML video tag for MP4
+            return f'<video width="600" height="400" controls><source src="{media_filename}" type="video/mp4">Your browser does not support the video tag.</video>'
+        elif media_extension == 'webp':
+            # Replace with HTML image tag for WebP with a JPG fallback
+            return f'<picture><source srcset="{media_filename}" type="image/webp"><img src="{media_filename.replace(".webp", ".jpg")}" style="max-width: 600px; max-height: 600px;" alt="Image"></picture>'
+    
+    return re.sub(pattern, replace, content)
+
+# Check for the command line argument
+if len(sys.argv) != 2:
+    print("Usage: ./whatsapp_to_html.py <input_file>")
+    sys.exit(1)
+
+input_file = sys.argv[1]
+
+# Try to read WhatsApp chat data from the specified file with UTF-8 encoding
+try:
+    with open(input_file, 'r', encoding='utf-8') as chat_file:
+        whatsapp_text = chat_file.read()
+except FileNotFoundError:
+    print(f"Error: File '{input_file}' not found.")
+    sys.exit(1)
+except UnicodeDecodeError:
+    print(f"Error: Unable to decode '{input_file}' as UTF-8.")
+    sys.exit(1)
+
+# Split the text into individual messages based on timestamps
+messages = re.split(r'\n?(?=\[\d{1,2}/\d{1,2}/\d{2}, \d{1,2}:\d{1,2}:\d{1,2}[\s\u202F](?:AM|PM)\])', whatsapp_text)
+
+# Create an HTML string
+html_output = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WhatsApp Chat</title>
+    <meta charset="UTF-8">
+    <style>
+        .message {{
+            margin: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #f7f7f7;
+            border-radius: 5px;
+        }}
+        .timestamp {{
+            font-weight: bold;
+            color: #555;
+        }}
+        .name {{
+            font-weight: bold;
+            color: #0074cc;
+        }}
+        .content {{
+            margin-top: 5px;
+        }}
+    </style>
+</head>
+<body>
+"""
+
+# Iterate through messages and create message divs in HTML
+for message in messages:
+    # Extract timestamp and content without discarding multiple lines
+    match = re.match(r'\[(.*?)\] (.*?): (.*)', message, re.DOTALL)
+    if match:
+        timestamp, name, content = match.groups()
+        timestamp = timestamp.strip()
+        name = name.strip()
+        content = content.strip()
+        
+        # Escape HTML special characters and emojis in elements
+        timestamp = html.escape(timestamp)
+        name = html.escape(name)
+        
+        # Replace attached media references with HTML elements
+        content = replace_attached_media(content)
+        
+        # Split multi-line messages into paragraphs
+        content = split_multiline_message(content)
+        
+        # Format the message div with style classes
+        html_output += f"""<div class="message">
+        <div class="timestamp">{timestamp}</div>
+        <div class="name">{name}</div>
+        <div class="content">{content}</div>
+        </div>\n"""
+
+# Close the HTML structure
+html_output += """
+</body>
+</html>
+"""
+
+# Save the HTML to a file with the UTF-8 encoding
+output_file = input_file.rsplit('.', 1)[0] + '.html'
+with open(output_file, 'w', encoding='utf-8') as html_file:
+    html_file.write(html_output)
+
+print(f"WhatsApp chat from '{input_file}' converted to HTML and saved as '{output_file}'.")
+
